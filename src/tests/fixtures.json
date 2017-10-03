@@ -1,0 +1,48 @@
+{
+    "users": {
+        "vf": {
+            "name": "Vladimir",
+            "joined": "28.09.2016"
+        },
+        "pz": {
+            "name": "Pavel",
+            "joined": "01.08.2016"
+        },
+        "pi": {
+            "name": "Ivan",
+            "joined": "03.03.2017"
+        },
+        "di": {
+            "name": "Dmitry",
+            "joined": "29.06.2017"
+        },
+        "vs": {
+            "name": "Vsevolod",
+            "joined": "15.07.2017"
+        }
+    },
+    "criterion": [
+        {
+            "title": "Tests",
+            "code": "test"
+        },
+        {
+            "title": "Crutches",
+            "code": "crutch"
+        },
+        {
+            "title": "Infrastructure",
+            "code": "infrastructure"
+        },
+        {
+            "title": "Tech Improvement",
+            "code": "tech"
+        }
+    ],
+    "results": {
+        "october": {
+            "pi": 1,
+            "pz": 2
+        }
+    }
+}            
