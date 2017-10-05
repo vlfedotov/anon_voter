@@ -21,28 +21,35 @@
             "joined": "15.07.2017"
         }
     },
-    "criterion": [
-        {
-            "title": "Tests",
-            "code": "test"
-        },
-        {
-            "title": "Crutches",
-            "code": "crutch"
-        },
-        {
-            "title": "Infrastructure",
-            "code": "infrastructure"
-        },
-        {
-            "title": "Tech Improvement",
-            "code": "tech"
-        }
-    ],
+    "criterion": {
+        "test": "Тесты",
+        "crutch": "Костыли",
+        "infrastructure": "Инфраструктура",
+        "tech": "Tech Improvement"
+    },
     "results": {
-        "october": {
-            "pi": 1,
-            "pz": 2
+        "2017": {
+            "october": {
+                "backend": {
+                    "results": {
+                        "pi": ["test", "crutch"],
+                        "pz": 2,
+                        "vf": 1,
+                        "vs": 1,
+                        "di": 2
+                    },
+                    "history": {
+                        "vf": {
+                            "test": ["pz", "pi"],
+                            "crutch": ["di", "vs"]
+                        },
+                        "pz": {
+                            "test": ["vf", "pi"],
+                            "crutch": ["di", "pz"]
+                        }
+                    }
+                }
+            }
         }
     }
 }            

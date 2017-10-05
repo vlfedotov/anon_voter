@@ -13,7 +13,7 @@ class App extends Component {
         return (
             <div>
               <Auth/>
-              <Voter/>
+              <Voter user="vf"/>
               <Result/>
             </div>
         );

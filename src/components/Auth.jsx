@@ -25,7 +25,7 @@ export default class Auth extends Component {
                 this.setState({username: email});
             })
             .catch(error => {
-                console.log(error);
+                alert(error);
             });
     }
 
