@@ -1,35 +1,47 @@
 {
     "users": {
         "vf": {
-            "name": "Vladimir",
+            "name": "Федотов Владимир",
+            "role": "backend",
             "joined": "28.09.2016"
         },
         "pz": {
-            "name": "Pavel",
+            "name": "Павел Завьялов",
+            "role": "backend",
             "joined": "01.08.2016"
         },
         "pi": {
-            "name": "Ivan",
+            "name": "Иван Поваляев",
+            "role": "backend",
             "joined": "03.03.2017"
         },
         "di": {
-            "name": "Dmitry",
+            "name": "Дмитрий Иванюшин",
+            "role": "backend",
             "joined": "29.06.2017"
         },
         "vs": {
-            "name": "Vsevolod",
+            "name": "Всеволод Щипунов",
+            "role": "backend",
             "joined": "15.07.2017"
+        },
+        "dd": {
+            "name": "Дмитрий Демьянов",
+            "role": "frontend",
+            "joined": "01.09.2017"
         }
     },
     "criterion": {
-        "test": "Тесты",
-        "crutch": "Костыли",
-        "infrastructure": "Инфраструктура",
-        "tech": "Tech Improvement"
+        "backend": {
+            "test": "Тесты",
+            "crutch": "Костыли",
+            "infrastructure": "Инфраструктура",
+            "tech": "Tech Improvement"
+        }
     },
     "results": {
         "2017": {
-            "october": {
+            "October": {
                 "backend": {
                     "results": {
                         "pi": ["test", "crutch"],
