@@ -1,56 +1,53 @@
 import React, { Component } from 'react';
-
 import { db } from '../config.jsx';
-
-
-
 
 
 function OneVote(props) {
     return (
         <div>
-            <div>Критерий: {props.criteria}</div>
-            <ul>
-                {props.applicants.map(function(person, index){
-                    return <li key={ index }>
-                        <label>
-                            <input type="checkbox"
-                                                   onChange={props.toggleCheckbox.bind(this, index)}
-                                                   value={ person.code } />
-                            { person.name }
+          <div>Критерий: {props.criteria}</div>
+          <ul>
+            {props.applicants.map(function(person, index){
+                return <li key={ index }>
+                    <label>
+                          <input type="checkbox"
+                                     checked={props.winners.indexOf(person.code) !== -1}
+                                     onChange={props.toggleCheckbox.bind(this, person.code)}
+                                     value={ person.code } />
+                              { person.name }
                         </label>
                     </li>;
-                })}
-            </ul>
+            })}
+          </ul>
         </div>
-    )
+    );
 }
 
 
 export default class Voter extends Component {
     constructor(props) {
         super(props);
-        console.log(props);
 
         this.vote = this.vote.bind(this);
         this.getProperCriterion = this.getProperCriterion.bind(this);
         this.getProperApplicants = this.getProperApplicants.bind(this);
         this.toggleCheckbox = this.toggleCheckbox.bind(this);
+        this.getResultsDB = this.getResultsDB.bind(this);
+        this.getCurrentCriteria = this.getCurrentCriteria.bind(this);
 
         this.state = {
             user: props.user,
             role: '',
             criterion: {},
-            applicants: [
-                // { code: "di", name: "Дмитрий Иванюшин" },
-                // { code: "pz", name: "Павел Завьялов" }
-            ],
+            applicants: [],
             
-            current_criteria: { code: 'tests', title: 'Тесты' },
-            winners: []
+            current_criteria: null,
+            winners: [],
+
+            ready: false
         };
 
-        this.getProperCriterion(props.user);
+        this.getProperCriterion();
         this.getProperApplicants(props.user);
         
     }
@@ -65,7 +62,6 @@ export default class Voter extends Component {
                         let clean_applicants = [];
                         for (let key in dirty_applicants) {
                             let ap = dirty_applicants[key];
-                            console.log(ap.joined);
                             let dirty_joined = ap.joined.split(".");
                             let joined = new Date(dirty_joined[2], dirty_joined[1] - 1, dirty_joined[0]);
                             const today = new Date();
@@ -85,16 +81,31 @@ export default class Voter extends Component {
             });
     }
 
-    getProperCriterion(user) {
-        db.getRole(user)
+    getProperCriterion() {
+        db.getRole(this.state.user)
             .then(snap => {
-                const user_role = snap.val()[user].role;
-                this.setState({'role': user_role});
-                // this.vote();
-                console.log(user_role);
+                const user_role = snap.val()[this.state.user].role;
+                this.setState({role: user_role});
                 db.getCriterion(user_role)
                     .then(snap => {
-                        this.setState({'criterion': snap.val()[user_role]});
+                        let criterion = snap.val()[user_role];
+                        const ref = this.getResultsDB();
+                        ref.once('value')
+                            .then(snap => {
+                                const userResults = snap.val();
+                                if (userResults) {
+                                    for (let key in criterion) {
+                                        if (Object.keys(userResults).indexOf(key) !== -1) {
+                                            delete criterion[key];
+                                        }
+                                    }
+                                }
+                                this.setState({criterion: criterion});
+                                this.getCurrentCriteria();
+                            })
+                            .catch(error => {
+                                console.log(error);
+                            });
                     })
                     .catch(error => {
                         console.log(error);
@@ -106,18 +117,28 @@ export default class Voter extends Component {
             });
     }
 
-    toggleCheckbox(ind) {
-        let new_winners = this.state.winners;
+    getCurrentCriteria() {
+        for (let key in this.state.criterion) {
+            this.setState({current_criteria: {code: key, title: this.state.criterion[key]}});
+            this.setState({ready: true});
+            return;
+        }
+        this.setState({current_criteria: null});
+        this.setState({ready: true});
+    }
 
-        if (this.state.winners.indexOf(this.state.applicants[ind].code) === -1) {
-            new_winners.push(this.state.applicants[ind].code);
+    toggleCheckbox(person_code) {
+        let new_winners = this.state.winners;
+        const idx = this.state.winners.indexOf(person_code);
+        if (idx === -1) {
+            new_winners.push(person_code);
         } else {
-            new_winners.splice(this.state.applicants[ind].code);
+            new_winners.splice(idx, 1);
         }
         this.setState({winners: new_winners});
     }
 
-    vote() {
+    getResultsDB() {
         const MONTHS = ["January", "February", "March", "April", "May", "June",
                         "July", "August", "September", "October", "November", "December"
                        ];
@@ -126,20 +147,44 @@ export default class Voter extends Component {
               year = today.getUTCFullYear(),
               month = MONTHS[today.getMonth()];
 
-        const ref = db.setResult(year, month, this.state.user, this.state.role);
-        console.log(ref);
+        return db.setResult(year, month, this.state.user, this.state.role);
+    }
+    
+    vote() {
+        if (this.state.winners.length === 0) {
+            console.log('Nobody is choisen');
+            return null;
+        }
+        this.setState({ready: false});
+        
+        const ref = this.getResultsDB();
         const updates = {
             [this.state.current_criteria.code]: this.state.winners
         };
 
         ref.update(updates);
-
+        this.getProperCriterion();
+        return null;
     }
 
-
     render() {
+        let screen;
+        if (!this.state.ready) {
+            screen = <div>Ждём</div>;
+        } else {
+            if (this.state.current_criteria) {
+                screen = <div>
+                    <OneVote criteria={this.state.current_criteria.title} winners={this.state.winners} applicants={this.state.applicants} toggleCheckbox={this.toggleCheckbox}/>
+                    <button onClick={this.vote}>Submit</button>
+                    </div>;
+            } else {
+                screen = <div>Все критерии выбраны</div>;
+            }
+        }
         return (
-            <OneVote criteria={this.state.current_criteria.title} applicants={this.state.applicants} toggleCheckbox={this.toggleCheckbox}/>
+            <div>
+              {screen}
+            </div>
         );
     }
 }
